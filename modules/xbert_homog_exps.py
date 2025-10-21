@@ -372,10 +372,12 @@ class BertOutput(nn.Module):
         hidden_states = self.dropout(hidden_states)
         hidden_states = self.LayerNorm(hidden_states + input_tensor)
         return hidden_states
+
 from modules.loss import Load_Balancing_loss
 from modules.adapters import NoParamMultiHeadAttention
 from modules.loss import Load_Balancing_loss
 from modules.encoders import RouterSelfAttention, RouterPFSelfAttention, RouterPFMultiHeadAttention
+
 class XBertLayer(nn.Module):
     def __init__(self, config, add_adapter=True):
         super().__init__()
@@ -503,14 +505,16 @@ class XBertLayer(nn.Module):
                 f[i] = torch.sum(selected_experts == i).float() / T
                 P[i] = torch.sum(gate_p[:, i]).float() / T
 
-            lbloss = Load_Balancing_loss()
+            lb_loss = self.lb_loss_per_modality(f, P, num_streams=3)
+            
+            """lbloss = Load_Balancing_loss()
             interval_1 = N
             interval_2 = N * 2
             lb_loss = (
                 lbloss(f[0:interval_1], P[0:interval_1]) +
                 lbloss(f[interval_1:interval_2], P[interval_1:interval_2]) +
                 lbloss(f[interval_2:self.num_experts], P[interval_2:self.num_experts])
-            ) * N
+            ) * N"""
         #------------------------------adapter_change------------------------------#
 
         outputs = self_attention_outputs[1:]  # add self attentions if we output attention weights
@@ -529,6 +533,16 @@ class XBertLayer(nn.Module):
         intermediate_output = self.intermediate(attention_output)
         layer_output = self.output(intermediate_output, attention_output)
         return layer_output
+    
+    def lb_loss_per_modality(self, f, P, num_streams=3):
+        lbloss_fn = Load_Balancing_loss()
+        N = self.num_experts // num_streams
+        lb_loss = 0.0
+        for s in range(num_streams):
+            start = s * N
+            end = start + N
+            lb_loss += lbloss_fn(f[start:end], P[start:end]) * N
+        return lb_loss
 
 class BertEncoder(nn.Module):
     def __init__(self, config):

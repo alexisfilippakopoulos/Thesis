@@ -531,6 +531,16 @@ class XBertLayer(nn.Module):
         intermediate_output = self.intermediate(attention_output)
         layer_output = self.output(intermediate_output, attention_output)
         return layer_output
+    
+    def lb_loss_per_modality(self, f, P, num_streams=3):
+        lbloss_fn = Load_Balancing_loss()
+        N = self.num_experts // num_streams
+        lb_loss = 0.0
+        for s in range(num_streams):
+            start = s * N
+            end = start + N
+            lb_loss += lbloss_fn(f[start:end], P[start:end]) * N
+        return lb_loss
 
 class BertEncoder(nn.Module):
     def __init__(self, config):
