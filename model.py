@@ -4,8 +4,8 @@ import torch.nn.functional as F
 from modules.encoders import *
 from transformers import BertTokenizer, BertConfig, T5Tokenizer, T5Config, BertModel
 from peft import LoraConfig, TaskType, get_peft_model
-#from modules.xbert_homog_exps import XBertModel
-from modules.xbert_heter_exps import XBertModel
+from modules.xbert_homog_exps import XBertModel
+#from modules.xbert_heter_exps import XBertModel
 
 class MMA_Bert(nn.Module):
     def __init__(self, hp):

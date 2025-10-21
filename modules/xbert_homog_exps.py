@@ -410,14 +410,14 @@ class XBertLayer(nn.Module):
             # self.alpha = config.alpha
             self.TopK = config.TopK
 
-            self.adapter_1 = GlobalTemporalExpert(bottleneck=self.rank)
-            self.adapter_2 = GlobalTemporalExpert(bottleneck=self.rank)
+            self.adapter_1 = LocalTemporalExpert(bottleneck=self.rank)
+            self.adapter_2 = LocalTemporalExpert(bottleneck=self.rank)
 
-            self.adapter_vision_1 = GlobalTemporalExpert(bottleneck=self.rank)
-            self.adapter_vision_2 = GlobalTemporalExpert(bottleneck=self.rank)
+            self.adapter_vision_1 = LocalTemporalExpert(bottleneck=self.rank)
+            self.adapter_vision_2 = LocalTemporalExpert(bottleneck=self.rank)
 
-            self.adapter_audio_1 = GlobalTemporalExpert(bottleneck=self.rank)
-            self.adapter_audio_2 = GlobalTemporalExpert(bottleneck=self.rank)
+            self.adapter_audio_1 = LocalTemporalExpert(bottleneck=self.rank)
+            self.adapter_audio_2 = LocalTemporalExpert(bottleneck=self.rank)
         
             self.adapter_atten_gate = RouterPFSelfAttention()
 
@@ -506,7 +506,7 @@ class XBertLayer(nn.Module):
                 P[i] = torch.sum(gate_p[:, i]).float() / T
 
             lb_loss = self.lb_loss_per_modality(f, P, num_streams=3)
-            
+
             """lbloss = Load_Balancing_loss()
             interval_1 = N
             interval_2 = N * 2
