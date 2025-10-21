@@ -505,16 +505,16 @@ class XBertLayer(nn.Module):
                 f[i] = torch.sum(selected_experts == i).float() / T
                 P[i] = torch.sum(gate_p[:, i]).float() / T
 
-            lb_loss = self.lb_loss_per_modality(f, P, num_streams=3)
+            #lb_loss = self.lb_loss_per_modality(f, P, num_streams=3)
 
-            """lbloss = Load_Balancing_loss()
+            lbloss = Load_Balancing_loss()
             interval_1 = N
             interval_2 = N * 2
             lb_loss = (
                 lbloss(f[0:interval_1], P[0:interval_1]) +
                 lbloss(f[interval_1:interval_2], P[interval_1:interval_2]) +
                 lbloss(f[interval_2:self.num_experts], P[interval_2:self.num_experts])
-            ) * N"""
+            ) * N
         #------------------------------adapter_change------------------------------#
 
         outputs = self_attention_outputs[1:]  # add self attentions if we output attention weights
