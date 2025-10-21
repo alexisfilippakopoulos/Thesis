@@ -4,7 +4,8 @@ import torch.nn.functional as F
 from modules.encoders import *
 from transformers import BertTokenizer, BertConfig, T5Tokenizer, T5Config, BertModel
 from peft import LoraConfig, TaskType, get_peft_model
-from modules.xbert import XBertModel
+#from modules.xbert_homog_exps import XBertModel
+from modules.xbert_heter_exps import XBertModel
 
 class MMA_Bert(nn.Module):
     def __init__(self, hp):
@@ -64,7 +65,7 @@ class MMA(nn.Module):
         hidden_states, LBLoss, ep_d = self.model(text, vision, audio)
         embedding = hidden_states[:,0,:]
         pred = self.cls_head(embedding)
-        return pred, LBLoss
+        return pred, LBLoss, ep_d
     
     def get_nb_trainable_parameters(self):
         r"""
